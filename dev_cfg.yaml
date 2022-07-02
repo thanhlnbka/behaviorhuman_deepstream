@@ -1,0 +1,33 @@
+# Config DEEPSTREAM
+PGIE_CONFIG_FILE: "configs/pgie_config.txt"
+TRACKER_CONFIG_FILE: "configs/tracker_config.txt"
+CONFIG_GPU_ID: "gpu-id"
+
+## tracker
+CONFIG_GROUP_TRACKER: "tracker"
+CONFIG_GROUP_TRACKER_WIDTH: "tracker-width"
+CONFIG_GROUP_TRACKER_HEIGHT: "tracker-height"
+CONFIG_GROUP_TRACKER_LL_CONFIG_FILE: "ll-config-file"
+CONFIG_GROUP_TRACKER_LL_LIB_FILE: "ll-lib-file"
+CONFIG_GROUP_TRACKER_ENABLE_BATCH_PROCESS: "enable-batch-process"
+
+## streamux && tiler
+MUXER_OUTPUT_WIDTH: 1920
+MUXER_OUTPUT_HEIGHT: 1080
+MUXER_BATCH_TIMEOUT_USEC: 25000
+TILED_OUTPUT_WIDTH: 1920
+TILED_OUTPUT_HEIGHT: 1080
+GST_CAPS_FEATURES_NVMM: "memory:NVMM"
+
+## det 
+MIN_CONFIDENCE: 0.3
+MAX_CONFIDENCE: 1.0
+PGIE_CLASS_ID_PERSON: 0
+pgie_classes_str: ["Person"]
+
+## max source 
+MAX_NUM_SOURCES: 8
+GPU_ID: 0
+
+# Config DATABASE
+

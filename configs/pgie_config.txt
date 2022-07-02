@@ -1,0 +1,25 @@
+[property]
+gpu-id=0
+net-scale-factor=0.0039215697906911373
+model-color-format=0
+custom-network-config=/opt/nvidia/deepstream/deepstream-6.1/projects/DeepStream-Yolo/yolov5_best.cfg
+model-file= /opt/nvidia/deepstream/deepstream-6.1/projects/DeepStream-Yolo/yolov5_best.wts
+model-engine-file=/media/ngoc-thanhluu/data/thanhlnbka/Projects/behaviorhuman_deepstream/models/model_b8_gpu0_fp32.engine
+#int8-calib-file= /opt/nvidia/deepstream/deepstream-6.1/projects/DeepStream-Yolo/calib.table
+labelfile-path= /opt/nvidia/deepstream/deepstream-6.1/projects/DeepStream-Yolo/labels.txt
+batch-size=8
+network-mode=0
+num-detected-classes=1
+interval=3
+gie-unique-id=1
+process-mode=1
+network-type=0
+cluster-mode=2
+maintain-aspect-ratio=1
+parse-bbox-func-name=NvDsInferParseYolo
+custom-lib-path= /opt/nvidia/deepstream/deepstream-6.1/projects/DeepStream-Yolo/nvdsinfer_custom_impl_Yolo/libnvdsinfer_custom_impl_Yolo.so
+engine-create-func-name=NvDsInferYoloCudaEngineGet
+
+[class-attrs-all]
+nms-iou-threshold=0.45
+pre-cluster-threshold=0.25

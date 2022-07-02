@@ -1,0 +1,3 @@
+0 loitering
+1 instrution
+2 crowhuman
