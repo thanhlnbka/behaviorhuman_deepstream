@@ -1,0 +1,2 @@
+0 loitering
+1 instrution

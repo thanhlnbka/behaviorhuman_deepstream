@@ -19,9 +19,14 @@ class Configs:
         self.CONFIG_GROUP_TRACKER_LL_CONFIG_FILE = info_cfg["CONFIG_GROUP_TRACKER_LL_CONFIG_FILE"]
         self.CONFIG_GROUP_TRACKER_LL_LIB_FILE = info_cfg["CONFIG_GROUP_TRACKER_LL_LIB_FILE"] 
         self.CONFIG_GROUP_TRACKER_ENABLE_BATCH_PROCESS = info_cfg["CONFIG_GROUP_TRACKER_ENABLE_BATCH_PROCESS"]
-         
+        
+        ## analytics
+        self.ANALYTIC_CONFIG_FILE = info_cfg["ANALYTIC_CONFIG_FILE"]
+        
 
         ## streamux && tiler
+        self.STREAMMUX_WIDTH = info_cfg["STREAMMUX_WIDTH"]
+        self.STREAMMUX_HEIGHT = info_cfg["STREAMMUX_HEIGHT"]
         self.MUXER_OUTPUT_WIDTH = info_cfg["MUXER_OUTPUT_WIDTH"]
         self.MUXER_OUTPUT_HEIGHT = info_cfg["MUXER_OUTPUT_HEIGHT"]
         self.MUXER_BATCH_TIMEOUT_USEC = info_cfg["MUXER_BATCH_TIMEOUT_USEC"]
@@ -39,12 +44,14 @@ class Configs:
         self.MAX_NUM_SOURCES = info_cfg["MAX_NUM_SOURCES"]
         self.GPU_ID = info_cfg["GPU_ID"]
 
+
+
     def read_config(self, pth_cfg):
         with open(pth_cfg) as f:
             data = yaml.load(f, Loader=SafeLoader)
         f.close()
         # print(data)clear
-        
+
         return data
     
 configs = Configs(pth_config="dev_cfg.yaml")

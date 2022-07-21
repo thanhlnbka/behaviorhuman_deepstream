@@ -1,0 +1,44 @@
+[property]
+enable=1
+#Width height used for configuration to which below configs are configured
+config-width=1920
+config-height=1080
+#osd-mode 0: Dont display any lines, rois and text
+#         1: Display only lines, rois and static text i.e. labels
+#         2: Display all info from 1 plus information about counts
+osd-mode=2
+#Set OSD font size that has to be displayed
+display-font-size=12
+
+## Per stream configuration
+[roi-filtering-stream-1]
+#enable or disable following feature
+enable=1
+#ROI to filter select objects, and remove from meta data
+roi-RF=295;643;700;100;642;913;56;828
+#remove objects in the ROI
+inverse-roi=0
+class-id=0
+
+
+## Per stream configuration
+[roi-filtering-stream-2]
+#enable or disable following feature
+enable=1
+#ROI to filter select objects, and remove from meta data
+roi-RF=0;15;800;20;2000;800;56;800
+#remove objects in the ROI
+inverse-roi=0
+class-id=0
+
+
+## Per stream configuration
+[roi-filtering-stream-4]
+#enable or disable following feature
+enable=1
+#ROI to filter select objects, and remove from meta data
+roi-RF=0;15;800;20;2000;800;56;800
+#remove objects in the ROI
+inverse-roi=0
+class-id=0
+

@@ -1,0 +1,36 @@
+<html>
+<head>
+	<title> flask pingpong</title>
+</head>
+<body>
+	<div id="div1"> 
+		<p id="value">Socket ID's:</p> 
+	</div>
+	<img id="1">
+	<img id="2">
+	<img id="3">
+	<img id="4">
+	<img id="5">
+	<img id="6">
+	<img id="7">
+	<img id="8">
+	<img id="9">
+	<img id="10">
+	<script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
+	<script type="text/javascript" charset="utf-8">
+		const socket = io('/');
+        socket.on('response', function(msg)
+        {
+        	console.log(socket.id);
+        	console.log(msg.key)
+        	var k=msg.key;
+        	var r=msg.data;
+        	//console.log(k);
+        	const image_element=document.getElementById(k);
+        	image_element.src="data:image/jpeg;base64,"+r;
+       		console.log("reached here");
+        });
+		
+    </script>
+</body>
+</html>

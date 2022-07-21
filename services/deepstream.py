@@ -1,5 +1,7 @@
 
-import sys 
+import sys
+from tkinter.tix import Tree
+from boto import config 
 import gi 
 gi.require_version("Gst","1.0")
 from gi.repository import GLib, Gst
@@ -23,6 +25,7 @@ class ServiceDeepStream:
         self.transform = None
         self.nvosd = None 
         self.sink = None
+        self.nvanalytics = None
 
         self.g_source = {}
         self.g_source_bin = {}
@@ -57,7 +60,7 @@ class ServiceDeepStream:
                 exit(1)
             
             self.g_source_bin[cam_id] = source_bin
-            self.pipeline.add(source_bin)
+            self.pipeline.add(self.g_source_bin[cam_id])
 
             #set state of source bin playing 
 
@@ -76,7 +79,7 @@ class ServiceDeepStream:
                 print("STATE CHANGE NO PREROLL\n")
             self.g_num_source += 1
 
-        return True 
+        return False  
 
     def delete_source(self, cam_ids):
         for cam_id in cam_ids:
@@ -87,6 +90,12 @@ class ServiceDeepStream:
                 self.loop.quit()
                 print("All sources stopped quitting")
                 return False
+        return True 
+
+    
+
+    def update_polygon(self):
+        self.nvanalytics.set_property("config-file", configs.ANALYTIC_CONFIG_FILE)
         return True 
         
 
@@ -178,9 +187,11 @@ class ServiceDeepStream:
         self.tiler = Gst.ElementFactory.make("nvmultistreamtiler", "nvtiler")
         self.nvvidconv = Gst.ElementFactory.make("nvvideoconvert", "convertor")
         self.nvosd = Gst.ElementFactory.make("nvdsosd", "onscreendisplay")
+        self.nvanalytics = Gst.ElementFactory.make("nvdsanalytics", "analytics")
         if (is_aarch64()):
             self.transform = Gst.ElementFactory.make("nvegltransform", "nvegl-transform")
         self.sink = Gst.ElementFactory.make("nveglglessink", "nvvideo-renderer")
+        # self.sink =Gst.ElementFactory.make("fakesink", "fakesink")
 
 
         
@@ -189,14 +200,18 @@ class ServiceDeepStream:
         self.streammux.set_property('batch-size', configs.MAX_NUM_SOURCES)
         self.streammux.set_property('batched-push-timeout', 40)
         self.streammux.set_property("gpu_id", configs.GPU_ID)
-        self.streammux.set_property('live-source',1)
-        self.streammux.set_property('width', 640)
-        self.streammux.set_property('height', 640)
+        # self.streammux.set_property('live-source',1)
+        self.streammux.set_property('width', configs.STREAMMUX_WIDTH)
+        self.streammux.set_property('height', configs.STREAMMUX_HEIGHT)
 
         #pgie 
         self.pgie.set_property('config-file-path', configs.PGIE_CONFIG_FILE)
         self.pgie.set_property("batch-size", configs.MAX_NUM_SOURCES)
         self.pgie.set_property("gpu-id",configs.GPU_ID)
+
+        #analytic
+        self.nvanalytics.set_property("config-file", configs.ANALYTIC_CONFIG_FILE)
+
 
 
         #tracker
@@ -231,10 +246,10 @@ class ServiceDeepStream:
         #tiler 
         tiler_rows = int(math.sqrt(configs.MAX_NUM_SOURCES))
         tiler_columns = int(math.ceil((1.0 * configs.MAX_NUM_SOURCES) / tiler_rows))
-        self.tiler.set_property("rows", tiler_rows)
-        self.tiler.set_property("columns", tiler_columns)
-        self.tiler.set_property("width", configs.TILED_OUTPUT_WIDTH)
-        self.tiler.set_property("height", configs.TILED_OUTPUT_HEIGHT)
+        # self.tiler.set_property("rows", 1)
+        # self.tiler.set_property("columns", 1)
+        # self.tiler.set_property("width", configs.TILED_OUTPUT_WIDTH)
+        # self.tiler.set_property("height", configs.TILED_OUTPUT_HEIGHT)
         self.tiler.set_property("gpu_id",configs.GPU_ID)
 
         #nvvidconv , nvvidconv1, nvosd
@@ -255,15 +270,37 @@ class ServiceDeepStream:
             self.nvvidconv.set_property("nvbuf-memory-type", mem_type)
             self.nvvidconv1.set_property("nvbuf-memory-type", mem_type)
             self.tiler.set_property("nvbuf-memory-type", mem_type)
+    
+    def create_queue(self):
+        self.queue1=Gst.ElementFactory.make("queue","queue1")
+        self.queue2=Gst.ElementFactory.make("queue","queue2")
+        self.queue3=Gst.ElementFactory.make("queue","queue3")
+        self.queue4=Gst.ElementFactory.make("queue","queue4")
+        self.queue5=Gst.ElementFactory.make("queue","queue5")
+        self.queue6=Gst.ElementFactory.make("queue","queue6")
+        self.queue7=Gst.ElementFactory.make("queue","queue7")
+        self.queue8=Gst.ElementFactory.make("queue","queue8")
+        self.queue9=Gst.ElementFactory.make("queue","queue9")
+        self.pipeline.add(self.queue1)
+        self.pipeline.add(self.queue2)
+        self.pipeline.add(self.queue3)
+        self.pipeline.add(self.queue4)
+        self.pipeline.add(self.queue5)
+        self.pipeline.add(self.queue6)
+        self.pipeline.add(self.queue7)
+        self.pipeline.add(self.queue8)
+        self.pipeline.add(self.queue9)
 
     def create_pipeline(self):
         self.make_elements()
         self.set_property_elements()
+        self.create_queue()
 
         print("Adding elements to Pipeline")
         self.pipeline.add(self.streammux)
         self.pipeline.add(self.pgie)
         self.pipeline.add(self.tracker)
+        self.pipeline.add(self.nvanalytics)
         self.pipeline.add(self.tiler) 
         self.pipeline.add(self.nvvidconv)
         self.pipeline.add(self.filter)
@@ -274,18 +311,29 @@ class ServiceDeepStream:
         self.pipeline.add(self.sink)
 
         print("Linking elements in the Pipeline")
-        self.streammux.link(self.pgie)
-        self.pgie.link(self.tracker)
-        self.tracker.link(self.nvvidconv1)
-        self.nvvidconv1.link(self.filter)
-        self.filter.link(self.tiler)
-        self.tiler.link(self.nvvidconv)
-        self.nvvidconv.link(self.nvosd)
+        self.streammux.link(self.queue1)
+        self.queue1.link(self.pgie)
+        self.pgie.link(self.queue2)
+        self.queue2.link(self.tracker)
+        self.tracker.link(self.queue3)
+        self.queue3.link(self.nvanalytics)
+        self.nvanalytics.link(self.queue4)
+        self.queue4.link(self.nvvidconv1)
+        self.nvvidconv1.link(self.queue5)
+        self.queue5.link(self.filter)
+        self.filter.link(self.queue6)
+        self.queue6.link(self.tiler)
+        self.tiler.link(self.queue7)
+        self.queue7.link(self.nvvidconv)
+        self.nvvidconv.link(self.queue8)
+        self.queue8.link(self.nvosd)
         if is_aarch64():
-            self.nvosd.link(self.transform)
+            self.nvosd.link(self.queue9)
+            self.queue9.link(self.transform)
             self.transform.link(self.sink)
         else:
-            self.nvosd.link(self.sink)
+            self.nvosd.link(self.queue9)
+            self.queue9.link(self.sink)
 
     
     
